@@ -1,4 +1,4 @@
-#mac
+#MacOs
 .DS_Store
 # Python-generated files
 __pycache__/
@@ -10,3 +10,5 @@ wheels/
 
 # Virtual environments
 .venv
+# IDE (PyCharm)
+.idea/

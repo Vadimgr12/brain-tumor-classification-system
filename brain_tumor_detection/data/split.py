@@ -2,6 +2,7 @@ import os
 import random
 import shutil
 from pathlib import Path
+from argparse import ArgumentParser
 
 def create_dirs(out_dir, splits):
     out_dir = Path(out_dir)
@@ -63,10 +64,10 @@ def split_dataset(data_dir, out_dir, train=0.7, val=0.2):
             copy_images(data_dir, train_val_dir, tumor_dir, test_files, 'test')
 
 
-
-
-
-
-
 if __name__ == "__main__":
-    split_dataset("data/raw/", "data/splits")
+    parser = ArgumentParser()
+    parser.add_argument("--input", required=True)
+    parser.add_argument("--output", required=True)
+    args = parser.parse_args()
+
+    split_dataset(args.input, args.output)

@@ -1,0 +1,21 @@
+schema: '2.0'
+stages:
+  split:
+    cmd: python brain_tumor_detection/data/split.py --input data/raw/ --output 
+      data/splits/
+    deps:
+    - path: brain_tumor_detection/data/split.py
+      hash: md5
+      md5: 07bb8720d63b13dab0f307f2c4909c21
+      size: 2456
+    - path: data/raw/
+      hash: md5
+      md5: 44f5fe7fb0109b3daf243825536be454.dir
+      size: 140240790
+      nfiles: 10498
+    outs:
+    - path: data/splits/
+      hash: md5
+      md5: fafbdca21ae151227ab61466ba502331.dir
+      size: 140209972
+      nfiles: 10498

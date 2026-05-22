@@ -1,0 +1,9 @@
+stages:
+  split:
+    desc: split raw dataset into train/val/test
+    cmd: python brain_tumor_detection/data/split.py --input data/raw/ --output data/splits/
+    deps:
+      - brain_tumor_detection/data/split.py
+      - data/raw/
+    outs:
+      - data/splits/
