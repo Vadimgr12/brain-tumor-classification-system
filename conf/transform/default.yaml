@@ -1,6 +1,6 @@
 image_size: 224
 p_horizontal: 0.5
-p_vertical: 0.1
+p_vertical: 0
 shift_limit: 0.05
 scale_limit: 0.1
 rotate_limit: 15

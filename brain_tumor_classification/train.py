@@ -34,6 +34,7 @@ def train(cfg: DictConfig) -> None:
     )
 
     model = BrainTumorModule(
+        n_unfrozen=cfg.model.n_unfrozen,
         lr=cfg.training.lr,
         weight_decay=cfg.training.weight_decay,
         t_max_scheduler=cfg.training.max_epochs,
@@ -41,7 +42,8 @@ def train(cfg: DictConfig) -> None:
         no_tumor_class=cfg.training.no_tumor_class,
     )
 
-    early_stopping = EarlyStopping(monitor="val_recall", mode="min", patience=3, min_delta=1e-4)
+    early_stopping = EarlyStopping(monitor="val_recall", mode="max",
+                                   patience=cfg.training.early_stopping_patience, min_delta=cfg.training.early_stopping_min_delta)
     callbacks = [
         ModelCheckpoint(
             dirpath=cfg.training.checkpoint_dir,
@@ -49,13 +51,9 @@ def train(cfg: DictConfig) -> None:
             monitor="val_recall",
             mode="max",
             save_top_k=1,
+            save_last=True
         ),
-        ModelCheckpoint(
-            dirpath=cfg.training.checkpoint_dir,
-            filename="last",
-            save_top_k=1,
-            every_n_epochs=1,
-        ),
+
         LearningRateMonitor(logging_interval="epoch"),
         early_stopping
 
