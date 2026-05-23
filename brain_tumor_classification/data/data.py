@@ -1,7 +1,6 @@
 from torch.utils.data import Dataset
 from pathlib import Path
 from PIL import Image
-from torchvision import transforms
 from torch.utils.data import DataLoader
 import lightning as L
 import torch
@@ -95,6 +94,7 @@ class BrainTumorDataModule(L.LightningDataModule):
             shuffle=True,
             num_workers=self.hparams.num_workers,
             drop_last=True,
+            persistent_workers=True
         )
 
     def val_dataloader(self):
@@ -104,6 +104,7 @@ class BrainTumorDataModule(L.LightningDataModule):
             batch_size=self.hparams.batch_size,
             shuffle=False,
             num_workers=self.hparams.num_workers,
+            persistent_workers=True
         )
 
     def test_dataloader(self):
@@ -113,4 +114,5 @@ class BrainTumorDataModule(L.LightningDataModule):
             batch_size=self.hparams.batch_size,
             shuffle=False,
             num_workers=self.hparams.num_workers,
+            persistent_workers=True
         )

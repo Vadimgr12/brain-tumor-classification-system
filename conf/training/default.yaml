@@ -1,1 +1,10 @@
 lr: 1e-3
+accelerator: mps
+num_devices: 1
+max_epochs: 15
+precision: 32
+no_tumor_class: 2
+out_classes: 4
+gradient_clip_val: 1
+weight_decay: 1e-4
+checkpoint_dir: checkpoints

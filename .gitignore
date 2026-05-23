@@ -16,3 +16,14 @@ wheels/
 #Lightning
 lightning_logs/
 checkpoints/
+runs/
+
+#Hydra
+outputs/
+**/.hydra/
+
+#mlflow
+mlflow.db
+mlartifacts/
+mlruns/
+logs/

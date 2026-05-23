@@ -1,0 +1,4 @@
+mlflow:
+  tracking_uri: http://localhost:8080
+  experiment_name: brain-tumor-classification
+  run_name: null

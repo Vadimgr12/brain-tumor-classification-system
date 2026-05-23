@@ -5,6 +5,11 @@ from model import BrainTumorModule
 from data.transforms import get_train_transforms, get_val_transforms
 from omegaconf import DictConfig
 import json
+from utilities.mlflow_logger_getter import build_logger
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from lightning.pytorch.callbacks.early_stopping import EarlyStopping
+from lightning.pytorch.callbacks.early_stopping import EarlyStoppingReason
+
 
 @hydra.main(config_path="../conf", config_name="config", version_base="1.3")
 def train(cfg: DictConfig) -> None:
@@ -30,14 +35,43 @@ def train(cfg: DictConfig) -> None:
 
     model = BrainTumorModule(
         lr=cfg.training.lr,
-        out_classes=cfg.model.out_classes
+        weight_decay=cfg.training.weight_decay,
+        t_max_scheduler=cfg.training.max_epochs,
+        out_classes=cfg.training.out_classes,
+        no_tumor_class=cfg.training.no_tumor_class,
     )
 
+    early_stopping = EarlyStopping(monitor="val_recall", mode="min", patience=3, min_delta=1e-4)
+    callbacks = [
+        ModelCheckpoint(
+            dirpath=cfg.training.checkpoint_dir,
+            filename="best",
+            monitor="val_recall",
+            mode="max",
+            save_top_k=1,
+        ),
+        ModelCheckpoint(
+            dirpath=cfg.training.checkpoint_dir,
+            filename="last",
+            save_top_k=1,
+            every_n_epochs=1,
+        ),
+        LearningRateMonitor(logging_interval="epoch"),
+        early_stopping
+
+    ]
+
+    logger = build_logger(cfg.logger.mlflow.tracking_uri, cfg.logger.mlflow.experiment_name, cfg.logger.mlflow.run_name)
+
     trainer = L.Trainer(
-        accelerator="mps",
-        devices=1,
-        max_epochs=10,
-        precision="32",
+        default_root_dir="runs/",
+        accelerator=cfg.training.accelerator,
+        devices=cfg.training.num_devices,
+        max_epochs=cfg.training.max_epochs,
+        precision=cfg.training.precision,
+        logger = logger,
+        gradient_clip_val=cfg.training.gradient_clip_val,
+        callbacks=callbacks
     )
 
     trainer.fit(
@@ -46,6 +80,9 @@ def train(cfg: DictConfig) -> None:
     )
 
 
+
 if __name__ == "__main__":
     train()
+
+
 
