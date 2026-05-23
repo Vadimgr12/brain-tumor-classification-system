@@ -12,3 +12,7 @@ wheels/
 .venv
 # IDE (PyCharm)
 .idea/
+
+#Lightning
+lightning_logs/
+checkpoints/

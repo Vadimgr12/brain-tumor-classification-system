@@ -1,0 +1,9 @@
+image_size: 224
+p_horizontal: 0.5
+p_vertical: 0.1
+shift_limit: 0.05
+scale_limit: 0.1
+rotate_limit: 15
+p_shift_scale_rotate: 0.5
+p_brightness: 0.2
+p_gauss_noise: 0.2
