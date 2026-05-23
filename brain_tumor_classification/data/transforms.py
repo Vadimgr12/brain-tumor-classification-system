@@ -5,10 +5,10 @@ def get_train_transforms(cfg, dataset_mean, dataset_std):
         A.Resize(cfg.image_size, cfg.image_size),
         A.HorizontalFlip(p=cfg.p_horizontal),
         A.VerticalFlip(p=cfg.p_vertical),
-        A.ShiftScaleRotate(
-            shift_limit=cfg.shift_limit,
-            scale_limit=cfg.scale_limit,
-            rotate_limit=cfg.rotate_limit,
+        A.Affine(
+            translate_percent=cfg.shift_limit,
+            scale=(1 - cfg.scale_limit, 1 + cfg.scale_limit),
+            rotate=(-cfg.rotate_limit, cfg.rotate_limit),
             p=cfg.p_shift_scale_rotate
         ),
         A.RandomBrightnessContrast(p=cfg.p_brightness),
