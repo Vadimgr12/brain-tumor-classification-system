@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torchvision.models import efficientnet_v2_s, EfficientNet_V2_S_Weights
 
+
 def get_model(n_unfrozen, out_features) -> torch.nn.Module:
     """Get model to work with"""
 
@@ -20,4 +21,3 @@ def get_model(n_unfrozen, out_features) -> torch.nn.Module:
         param.requires_grad = True
 
     return model
-

@@ -1,7 +1,7 @@
 schema: '2.0'
 stages:
   split:
-    cmd: python brain_tumor_classification/data/split.py --input data/raw/ 
+    cmd: python brain_tumor_classification/data/split.py --input data/raw/
       --output data/splits/
     deps:
     - path: brain_tumor_classification/data/split.py
@@ -20,7 +20,7 @@ stages:
       size: 140209972
       nfiles: 10498
   train_statistics:
-    cmd: python brain_tumor_classification/data/compute_stats.py --input 
+    cmd: python brain_tumor_classification/data/compute_stats.py --input
       data/splits/train --output data/stats/mean_std.json
     deps:
     - path: brain_tumor_classification/data/compute_stats.py

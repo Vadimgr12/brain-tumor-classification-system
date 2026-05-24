@@ -45,4 +45,3 @@ stages:
       - scripts/export_tensorrt.sh
     outs:
       - artifacts/model.trt
-

@@ -8,14 +8,15 @@ from torchmetrics.classification import (
     F1Score,
     BinaryRecall,
     AveragePrecision,
-    BinaryConfusionMatrix
+    BinaryConfusionMatrix,
 )
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 
 class BrainTumorModule(L.LightningModule):
-
-    def __init__(self,n_unfrozen ,lr, t_max_scheduler,weight_decay,out_classes, no_tumor_class):
+    def __init__(
+        self, n_unfrozen, lr, t_max_scheduler, weight_decay, out_classes, no_tumor_class
+    ):
 
         super().__init__()
         self.save_hyperparameters()
@@ -27,16 +28,20 @@ class BrainTumorModule(L.LightningModule):
         self.no_tumor_class = no_tumor_class
 
         self.val_acc = Accuracy(task="multiclass", num_classes=out_classes)
-        self.val_recall = Recall(task="multiclass", num_classes=out_classes, average="macro")
-        self.val_f1 = F1Score(task="multiclass", num_classes=out_classes, average="macro")
+        self.val_recall = Recall(
+            task="multiclass", num_classes=out_classes, average="macro"
+        )
+        self.val_f1 = F1Score(
+            task="multiclass", num_classes=out_classes, average="macro"
+        )
         self.val_bin_recall = BinaryRecall()
-        self.val_pr_auc = AveragePrecision(task="multiclass",num_classes=out_classes ,average="macro")
+        self.val_pr_auc = AveragePrecision(
+            task="multiclass", num_classes=out_classes, average="macro"
+        )
         self.bin_cm = BinaryConfusionMatrix()
-
 
     def forward(self, x):
         return self.model(x)
-
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -65,7 +70,7 @@ class BrainTumorModule(L.LightningModule):
         self.val_acc.update(preds, y)
         self.val_recall.update(preds, y)
         self.val_f1.update(preds, y)
-        self.val_pr_auc.update(probs,y)
+        self.val_pr_auc.update(probs, y)
         self.val_bin_recall.update(preds_bin, y_bin)
         self.bin_cm.update(preds_bin, y_bin)
 
@@ -100,7 +105,7 @@ class BrainTumorModule(L.LightningModule):
                 decay.append(param)
 
         optimizer = torch.optim.AdamW(
-            #filter(lambda p: p.requires_grad, self.parameters()),
+            # filter(lambda p: p.requires_grad, self.parameters()),
             [
                 {"params": decay, "weight_decay": 1e-4},
                 {"params": no_decay, "weight_decay": 0.0},
@@ -111,14 +116,9 @@ class BrainTumorModule(L.LightningModule):
             optimizer,
             T_max=self.t_max_scheduler,
             eta_min=self.lr * 0.01,
-
         )
 
         return {
             "optimizer": optimizer,
             "lr_scheduler": {"scheduler": scheduler, "interval": "epoch"},
         }
-
-
-
-

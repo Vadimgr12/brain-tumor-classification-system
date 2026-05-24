@@ -20,16 +20,12 @@ def train(cfg: DictConfig) -> None:
     dataset_std = stats["std"]
 
     datamodule = BrainTumorDataModule(
-        data_dir = cfg.data.data_dir,
+        data_dir=cfg.data.data_dir,
         batch_size=cfg.data.batch_size,
         num_workers=cfg.data.num_workers,
         max_samples=cfg.data.max_samples,
-        train_transform=get_train_transforms(
-            cfg.transform, dataset_mean, dataset_std
-        ),
-        val_transform=get_val_transforms(
-            cfg.transform, dataset_mean, dataset_std
-        )
+        train_transform=get_train_transforms(cfg.transform, dataset_mean, dataset_std),
+        val_transform=get_val_transforms(cfg.transform, dataset_mean, dataset_std),
     )
 
     model = BrainTumorModule(
@@ -41,8 +37,12 @@ def train(cfg: DictConfig) -> None:
         no_tumor_class=cfg.training.no_tumor_class,
     )
 
-    early_stopping = EarlyStopping(monitor="val_recall", mode="max",
-                                   patience=cfg.training.early_stopping_patience, min_delta=cfg.training.early_stopping_min_delta)
+    early_stopping = EarlyStopping(
+        monitor="val_recall",
+        mode="max",
+        patience=cfg.training.early_stopping_patience,
+        min_delta=cfg.training.early_stopping_min_delta,
+    )
     callbacks = [
         ModelCheckpoint(
             dirpath=cfg.training.checkpoint_dir,
@@ -50,15 +50,17 @@ def train(cfg: DictConfig) -> None:
             monitor="val_recall",
             mode="max",
             save_top_k=1,
-            save_last=True
+            save_last=True,
         ),
-
         LearningRateMonitor(logging_interval="epoch"),
-        early_stopping
-
+        early_stopping,
     ]
 
-    logger = build_logger(cfg.logger.mlflow.tracking_uri, cfg.logger.mlflow.experiment_name, cfg.logger.mlflow.run_name)
+    logger = build_logger(
+        cfg.logger.mlflow.tracking_uri,
+        cfg.logger.mlflow.experiment_name,
+        cfg.logger.mlflow.run_name,
+    )
 
     trainer = L.Trainer(
         default_root_dir="runs/",
@@ -66,20 +68,13 @@ def train(cfg: DictConfig) -> None:
         devices=cfg.training.num_devices,
         max_epochs=cfg.training.max_epochs,
         precision=cfg.training.precision,
-        logger = logger,
+        logger=logger,
         gradient_clip_val=cfg.training.gradient_clip_val,
-        callbacks=callbacks
+        callbacks=callbacks,
     )
 
-    trainer.fit(
-        model,
-        datamodule=datamodule
-    )
-
+    trainer.fit(model, datamodule=datamodule)
 
 
 if __name__ == "__main__":
     train()
-
-
-
