@@ -6,11 +6,14 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "albumentations>=2.0.8",
+    "fastapi>=0.136.1",
     "lightning>=2.6.4",
     "numpy>=2.4.6",
+    "python-multipart>=0.0.29",
     "torch>=2.12.0",
     "torchmetrics>=1.9.0",
     "torchvision>=0.27.0",
+    "uvicorn>=0.47.0",
 ]
 
 [dependency-groups]
