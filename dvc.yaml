@@ -28,7 +28,7 @@ stages:
     outs:
       - checkpoints/
 
-  export_onnx:
+  git:
     desc: Export best model to ONNX
     cmd: python scripts/export_onnx.py
     deps:
