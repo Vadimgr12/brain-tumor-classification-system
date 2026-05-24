@@ -18,7 +18,7 @@ class BrainTumorModule(L.LightningModule):
     def __init__(self,n_unfrozen ,lr, t_max_scheduler,weight_decay,out_classes, no_tumor_class):
 
         super().__init__()
-
+        self.save_hyperparameters()
         self.model = get_model(n_unfrozen, out_classes)
         self.criterion = nn.CrossEntropyLoss()
         self.lr = lr

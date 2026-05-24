@@ -27,3 +27,6 @@ mlflow.db
 mlartifacts/
 mlruns/
 logs/
+
+#converting model
+artifacts/

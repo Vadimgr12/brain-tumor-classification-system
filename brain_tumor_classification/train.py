@@ -8,7 +8,6 @@ import json
 from utilities.mlflow_logger_getter import build_logger
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
-from lightning.pytorch.callbacks.early_stopping import EarlyStoppingReason
 
 
 @hydra.main(config_path="../conf", config_name="config", version_base="1.3")

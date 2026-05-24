@@ -17,3 +17,32 @@ stages:
     outs:
       - data/stats/
 
+  train:
+    desc: Train brain tumor classifier
+    cmd: python train.py
+    deps:
+      - brain_tumor_classification/model.py
+      - brain_tumor_classification/data/
+      - conf/
+      - data/
+    outs:
+      - checkpoints/
+
+  export_onnx:
+    desc: Export best model to ONNX
+    cmd: python scripts/export_onnx.py
+    deps:
+      - scripts/export_onnx.py
+      - checkpoints/
+    outs:
+      - artifacts/model.onnx
+
+  export_tensorrt:
+    desc: Convert ONNX model to TensorRT
+    cmd: bash scripts/export_tensorrt.sh artifacts/model.onnx
+    deps:
+      - artifacts/model.onnx
+      - scripts/export_tensorrt.sh
+    outs:
+      - artifacts/model.trt
+

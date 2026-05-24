@@ -1,5 +1,5 @@
 data_dir: data/splits
 batch_size: 16
 num_workers: 2
-image_size: 224
+image_size: 256
 max_samples: null
