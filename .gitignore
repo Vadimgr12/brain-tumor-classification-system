@@ -30,3 +30,6 @@ logs/
 
 #converting model
 artifacts/
+
+#onnx models
+*.onnx*

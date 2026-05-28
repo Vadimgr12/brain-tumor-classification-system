@@ -9,7 +9,7 @@ stages:
 
   split:
     desc: split raw dataset into train/val/test
-    cmd: python brain_tumor_classification/data/split.py --input data/raw/ --output data/splits/
+    cmd: python brain_tumor_classification/data/split.py --data_dir data/raw/ --out_dir data/splits/
     deps:
       - brain_tumor_classification/data/split.py
       - data/raw/
@@ -18,7 +18,7 @@ stages:
 
   train_statistics:
     desc: compute mean/std statistics on train split
-    cmd: python brain_tumor_classification/data/compute_stats.py --input data/splits/train --output data/stats/mean_std.json
+    cmd: python brain_tumor_classification/data/compute_stats.py --data_dir data/splits/train --out_path data/stats/mean_std.json
     deps:
       - brain_tumor_classification/data/compute_stats.py
       - data/splits/train

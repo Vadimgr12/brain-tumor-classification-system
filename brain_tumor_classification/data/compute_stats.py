@@ -2,7 +2,7 @@ from pathlib import Path
 from PIL import Image
 import numpy as np
 import json
-from argparse import ArgumentParser
+import fire
 import random
 
 
@@ -39,9 +39,4 @@ def compute_train_stats(data_dir, out_path):
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("--input", required=True)
-    parser.add_argument("--output", required=True)
-    args = parser.parse_args()
-
-    compute_train_stats(args.input, args.output)
+    fire.Fire(compute_train_stats)

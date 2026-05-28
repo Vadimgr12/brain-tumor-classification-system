@@ -1,40 +1,53 @@
 schema: '2.0'
 stages:
   split:
-    cmd: python brain_tumor_classification/data/split.py --input data/raw/
-      --output data/splits/
+    cmd: python brain_tumor_classification/data/split.py --data_dir data/raw/
+      --out_dir data/splits/
     deps:
     - path: brain_tumor_classification/data/split.py
       hash: md5
-      md5: 7b336597abea52b58fd125c7a46995fc
-      size: 2496
+      md5: 112f481d50b941fabe6a828c913cefae
+      size: 2294
     - path: data/raw/
       hash: md5
-      md5: 654a54246765d538a642700f641cca9a.dir
-      size: 140253024
-      nfiles: 10503
+      md5: 44f5fe7fb0109b3daf243825536be454.dir
+      size: 140240790
+      nfiles: 10498
     outs:
     - path: data/splits/
       hash: md5
-      md5: 5aee95e2284e7373f0b2b486ebd303e5.dir
-      size: 140185280
-      nfiles: 10496
+      md5: 4cc80a25f3a14d9434b8ffc3f6dff073.dir
+      size: 140209972
+      nfiles: 10498
   train_statistics:
-    cmd: python brain_tumor_classification/data/compute_stats.py --input
-      data/splits/train --output data/stats/mean_std.json
+    cmd: python brain_tumor_classification/data/compute_stats.py --data_dir
+      data/splits/train --out_path data/stats/mean_std.json
     deps:
     - path: brain_tumor_classification/data/compute_stats.py
       hash: md5
-      md5: 6f1ce12b394757aa6b6b60fb1fb509b9
-      size: 1313
+      md5: 999c1a32f997b5cb83ad5eccf28b4a94
+      size: 1075
     - path: data/splits/train
       hash: md5
-      md5: 9fbde2be61c2c7ab547b315642e21630.dir
-      size: 98511836
+      md5: c5d8f673d0a7291cf4dddaefe90c80e3.dir
+      size: 98250430
       nfiles: 7344
     outs:
     - path: data/stats/
       hash: md5
-      md5: f2e0e5123d3a7ef3f43d102a0b22f051.dir
-      size: 213
+      md5: a394c1413b84424874d1534a4a098d45.dir
+      size: 214
       nfiles: 1
+  download:
+    cmd: bash scripts/download_data.sh
+    deps:
+    - path: scripts/download_data.sh
+      hash: md5
+      md5: 99cd11599ff1c9bd15f114b6adbc6778
+      size: 116
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: 44f5fe7fb0109b3daf243825536be454.dir
+      size: 140240790
+      nfiles: 10498

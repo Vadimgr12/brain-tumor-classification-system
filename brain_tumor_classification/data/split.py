@@ -2,7 +2,7 @@ import os
 import random
 import shutil
 from pathlib import Path
-from argparse import ArgumentParser
+import fire
 
 
 def create_dirs(out_dir, splits):
@@ -68,9 +68,4 @@ def split_dataset(data_dir, out_dir, train=0.7, val=0.2):
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("--input", required=True)
-    parser.add_argument("--output", required=True)
-    args = parser.parse_args()
-
-    split_dataset(args.input, args.output)
+    fire.Fire(split_dataset)
