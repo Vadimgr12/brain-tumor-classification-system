@@ -22,8 +22,12 @@ class BrainTumorDataset(Dataset):
 
         self.transform = transform
 
+        if isinstance(max_samples, float) and max_samples < 1.0:
+            max_samples = int(len(self.image_paths) * max_samples)
+
         if max_samples is not None:
             self.image_paths = random.sample(self.image_paths, max_samples)
+            # print(self.image_paths)
 
     def __len__(self):
         return len(self.image_paths)
@@ -43,7 +47,7 @@ class BrainTumorDataset(Dataset):
             first_line = f.readline().strip()
 
         if first_line == "":
-            class_id = 3
+            class_id = 2
 
         else:
             class_id = int(first_line.split()[0])
