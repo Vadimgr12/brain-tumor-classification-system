@@ -1,0 +1,18 @@
+name: "my_onnx_model"
+platform: "onnxruntime_onnx"
+
+input [
+  {
+    name: "x"
+    data_type: TYPE_FP32
+    dims: [1, 3, 224, 224]
+  }
+]
+
+output [
+  {
+    name: "linear"
+    data_type: TYPE_FP32
+    dims: [1, 4]
+  }
+]

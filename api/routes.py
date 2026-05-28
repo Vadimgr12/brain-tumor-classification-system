@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File
+from services.triton_client import infer
 
 router = APIRouter()
 
@@ -11,9 +12,6 @@ def health():
 @router.post("/predict")
 async def predict(file: UploadFile = File(...)):
     contents = await file.read()
+    triton_answer = infer(contents)
 
-    return {
-        "filename": file.filename,
-        "content_type": file.content_type,
-        "size_bytes": len(contents),
-    }
+    return triton_answer
