@@ -6,19 +6,19 @@ stages:
     deps:
     - path: brain_tumor_classification/data/split.py
       hash: md5
-      md5: 07bb8720d63b13dab0f307f2c4909c21
-      size: 2456
+      md5: 7b336597abea52b58fd125c7a46995fc
+      size: 2496
     - path: data/raw/
       hash: md5
-      md5: 44f5fe7fb0109b3daf243825536be454.dir
-      size: 140240790
-      nfiles: 10498
+      md5: 654a54246765d538a642700f641cca9a.dir
+      size: 140253024
+      nfiles: 10503
     outs:
     - path: data/splits/
       hash: md5
-      md5: 1d9fcc52639f88331bafe5a117ae0e5a.dir
-      size: 140209972
-      nfiles: 10498
+      md5: 5aee95e2284e7373f0b2b486ebd303e5.dir
+      size: 140185280
+      nfiles: 10496
   train_statistics:
     cmd: python brain_tumor_classification/data/compute_stats.py --input
       data/splits/train --output data/stats/mean_std.json

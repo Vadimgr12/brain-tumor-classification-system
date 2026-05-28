@@ -30,6 +30,7 @@ def split_dataset(data_dir, out_dir, train=0.7, val=0.2):
             img_dir = Path(data_dir) / train_val_dir / tumor_dir / "images"
             files = list(img_dir.glob("*.jpg"))
 
+            random.seed(42)
             random.shuffle(files)
 
             n = len(files)
@@ -48,7 +49,7 @@ def split_dataset(data_dir, out_dir, train=0.7, val=0.2):
 
                     path = new_path / "images"
                     num_files = str(len(list(path.glob("*.jpg"))) + 1)
-                    new_file_name = num_files + tumor_dir[0] + train_val_dir[0]
+                    new_file_name = num_files + tumor_dir[0] + split[0:2]
 
                     shutil.copy2(file_name, path / f"{new_file_name}.jpg")
 
