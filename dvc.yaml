@@ -1,4 +1,12 @@
 stages:
+  download:
+    desc: Download brain MRI dataset from Kaggle
+    cmd: bash scripts/download_data.sh
+    deps:
+      - scripts/download_data.sh
+    outs:
+      - data/raw
+
   split:
     desc: split raw dataset into train/val/test
     cmd: python brain_tumor_classification/data/split.py --input data/raw/ --output data/splits/
@@ -28,7 +36,7 @@ stages:
     outs:
       - checkpoints/
 
-  git:
+  export_onnx:
     desc: Export best model to ONNX
     cmd: python scripts/export_onnx.py
     deps:
