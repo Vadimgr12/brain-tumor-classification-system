@@ -8,8 +8,11 @@ from torchmetrics.classification import (
     F1Score,
     BinaryRecall,
     AveragePrecision,
-    BinaryConfusionMatrix,
+    ConfusionMatrix,
+    AUROC,
 )
+import seaborn as sns
+import matplotlib.pyplot as plt
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 
@@ -27,18 +30,17 @@ class BrainTumorModule(L.LightningModule):
         self.weight_decay = weight_decay
         self.no_tumor_class = no_tumor_class
 
-        self.val_acc = Accuracy(task="multiclass", num_classes=out_classes)
-        self.val_recall = Recall(
+        self.acc = Accuracy(task="multiclass", num_classes=out_classes)
+        self.recall = Recall(
             task="multiclass", num_classes=out_classes, average="macro"
         )
-        self.val_f1 = F1Score(
+        self.f1 = F1Score(task="multiclass", num_classes=out_classes, average="macro")
+        self.bin_recall = BinaryRecall()
+        self.pr_auc = AveragePrecision(
             task="multiclass", num_classes=out_classes, average="macro"
         )
-        self.val_bin_recall = BinaryRecall()
-        self.val_pr_auc = AveragePrecision(
-            task="multiclass", num_classes=out_classes, average="macro"
-        )
-        self.bin_cm = BinaryConfusionMatrix()
+        self.auroc = AUROC(task="multiclass", num_classes=out_classes, average="macro")
+        self.confmat = ConfusionMatrix(task="multiclass", num_classes=out_classes)
 
     def forward(self, x):
         return self.model(x)
@@ -47,8 +49,8 @@ class BrainTumorModule(L.LightningModule):
         x, y = batch
         logits = self(x)
         loss = self.criterion(logits, y)
-        self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
-
+        self.log("train_loss_epoch", loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("train_loss", loss, on_step=True, on_epoch=False, prog_bar=True)
         return loss
 
     def to_binary(self, preds, targets):
@@ -67,31 +69,60 @@ class BrainTumorModule(L.LightningModule):
         preds_bin, y_bin = self.to_binary(preds, y)
 
         self.log("val_loss", loss, on_step=False, on_epoch=True)
-        self.val_acc.update(preds, y)
-        self.val_recall.update(preds, y)
-        self.val_f1.update(preds, y)
-        self.val_pr_auc.update(probs, y)
-        self.val_bin_recall.update(preds_bin, y_bin)
-        self.bin_cm.update(preds_bin, y_bin)
+        self.acc.update(preds, y)
+        self.recall.update(preds, y)
+        self.f1.update(preds, y)
+        self.pr_auc.update(probs, y)
+        self.bin_recall.update(preds_bin, y_bin)
+        self.auroc.update(probs, y)
+        self.confmat.update(preds, y)
 
         return loss
 
     def on_validation_epoch_end(self):
-        self.log("val_acc", self.val_acc.compute())
-        self.log("val_recall", self.val_recall.compute())
-        self.log("val_f1", self.val_f1.compute())
-        self.log("pr_auc", self.val_pr_auc.compute())
-        cm = self.bin_cm.compute()
-        tn, fp, fn, tp = cm.ravel()
+        self.log("Accuracy", self.acc.compute())
+        self.log("Recall", self.recall.compute())
+        self.log("F1", self.f1.compute())
+        self.log("PR-AUC", self.pr_auc.compute())
+        self.log("ROC-AUC", self.auroc.compute())
 
-        self.log("val_recall_bin", self.val_bin_recall.compute())
-        self.log("binary_fn", fn.float())
-        self.val_acc.reset()
-        self.val_recall.reset()
-        self.val_f1.reset()
-        self.val_bin_recall.reset()
-        self.bin_cm.reset()
-        self.val_pr_auc.reset()
+        labels = ["No Tumor", "Glioma", "Meningioma", "Pituitary"]
+        order = [2, 0, 1, 3]
+        confmat_counted = self.confmat.compute().cpu().numpy()
+        confmat_counted_ordered = confmat_counted[order][:, order]
+        fig, ax = plt.subplots(figsize=(6, 5))
+        sns.heatmap(
+            confmat_counted_ordered,
+            annot=True,
+            fmt="d",
+            ax=ax,
+            xticklabels=labels,
+            yticklabels=labels,
+            cmap="Blues",
+        )
+
+        ax.xaxis.tick_top()
+        ax.xaxis.set_label_position("top")
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("True")
+        plt.tight_layout()
+
+        self.logger.experiment.log_figure(
+            run_id=self.logger.run_id,
+            figure=fig,
+            artifact_file=f"confusion_matrix_epoch_{self.current_epoch:03d}.png",
+        )
+
+        plt.close(fig)
+
+        self.log("Recall_binary", self.bin_recall.compute())
+        self.acc.reset()
+        self.recall.reset()
+        self.f1.reset()
+        self.bin_recall.reset()
+        self.pr_auc.reset()
+        self.auroc.reset()
+        self.confmat.reset()
 
     def configure_optimizers(self):
         decay, no_decay = [], []

@@ -38,7 +38,7 @@ def train(cfg: DictConfig) -> None:
     )
 
     early_stopping = EarlyStopping(
-        monitor="val_recall",
+        monitor="Recall",
         mode="max",
         patience=cfg.training.early_stopping_patience,
         min_delta=cfg.training.early_stopping_min_delta,
@@ -47,7 +47,7 @@ def train(cfg: DictConfig) -> None:
         ModelCheckpoint(
             dirpath=cfg.training.checkpoint_dir,
             filename="best",
-            monitor="val_recall",
+            monitor="Recall",
             mode="max",
             save_top_k=1,
             save_last=True,
@@ -71,6 +71,7 @@ def train(cfg: DictConfig) -> None:
         logger=logger,
         gradient_clip_val=cfg.training.gradient_clip_val,
         callbacks=callbacks,
+        log_every_n_steps=10,
     )
 
     trainer.fit(model, datamodule=datamodule)
