@@ -5,10 +5,11 @@ from PIL import Image
 import json
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
+from services.constants import IMAGE_SIZE
 import io
 
 
-def get_val_transforms(mean, std, image_size=224):
+def get_val_transforms(mean, std, image_size):
     return A.Compose(
         [
             A.Resize(image_size, image_size),
@@ -31,7 +32,7 @@ def preprocess(x: Union[bytes, np.ndarray, torch.Tensor]):
 
     dataset_mean = stats["mean"]
     dataset_std = stats["std"]
-    transform = get_val_transforms(dataset_mean, dataset_std, image_size=224)
+    transform = get_val_transforms(dataset_mean, dataset_std, image_size=IMAGE_SIZE)
     x = transform(image=x)["image"]
 
     x = np.expand_dims(x, axis=0)
