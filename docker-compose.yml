@@ -1,4 +1,17 @@
 services:
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    env_file:
+      - ../envs/.minio.env.example
+    command: server /data --console-address ":9001"
+    networks:
+      - my_network
+
   http-gateway:
     build:
       context: .
@@ -29,3 +42,12 @@ services:
       tritonserver
       --model-repository=/triton/models
       --log-verbose=1
+    networks:
+      - my_network
+
+volumes:
+  minio_data:
+
+networks:
+  my_network:
+    driver: bridge
