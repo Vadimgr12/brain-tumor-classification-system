@@ -14,7 +14,7 @@ def create_dirs(out_dir, splits):
             path.mkdir(parents=True, exist_ok=True)
 
 
-def split_dataset(data_dir, out_dir, train=0.7, val=0.2):
+def split_dataset(data_dir, out_dir, train=0.7, val=0.15):
     train_val_dirs = ["Train", "Val"]
     tumor_dirs = [
         d
