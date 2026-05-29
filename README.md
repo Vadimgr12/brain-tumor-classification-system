@@ -1,6 +1,83 @@
 # MRI Brain Tumor Classification System
 
 An end-to-end MLOps pipeline for brain tumor classification from MRI images using a fine-tuned EfficientNetV2-S architecture pretrained on ImageNet. This system covers the full machine learning lifecycle: automated data ingestion, preprocessing, reproducible pipeline orchestration, experiment tracking, model export, and inference serving using multiple backends.
+
+## Project Structure
+```text
+.
+├── .gitignore
+├── .dvcignore
+├── .pre-commit-config.yaml
+├── .python-version
+├── Makefile
+├── README.md
+├── pyproject.toml
+├── uv.lock
+├── dvc.lock
+├── dvc.yaml
+├── docker-compose.yml
+├── api/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── routes.py
+│   └── schemas.py
+├── brain_tumor_classification/
+│   ├── __init__.py
+│   ├── data/
+│   │   ├── compute_stats.py
+│   │   ├── data.py
+│   │   ├── split.py
+│   │   └── transforms.py
+│   ├── evaluate.py
+│   ├── model.py
+│   ├── train.py
+│   └── utilities/
+│       ├── __init__.py
+│       ├── mlflow_logger_getter.py
+│       ├── model_getter.py
+│       └── model_loader.py
+├── conf/
+│   ├── config.yaml
+│   ├── data/
+│   │   └── default.yaml
+│   ├── eval/
+│   │   └── default.yaml
+│   ├── infer/
+│   │   └── default.yaml
+│   ├── logger/
+│   │   └── default.yaml
+│   ├── model/
+│   │   └── default.yaml
+│   ├── training/
+│   │   └── default.yaml
+│   ├── transform/
+│   │   └── default.yaml
+│   └── triton/
+│       └── default.yaml
+├── data/
+│       |_ .gitignore
+├── envs/
+│       |_ .minio.env.example
+├── images/
+│   ├── fastapi.png
+│   ├── meningioma_ex.jpg
+│   └── mlflow1.png
+├── infer.py
+├── scripts/
+│   ├── download_data.sh
+│   ├── make_triton_config.py
+│   └── exports/
+│       ├── export_onnx.py
+│       └── export_tensorrt.sh
+├── services/
+│   ├── __init__.py
+│   ├── constants.py
+│   ├── postprocessing.py
+│   ├── preprocessing.py
+│   └── triton_client.py
+
+ ```
+
 ## Problem Statement
 The objective of this project is to accurately classify brain MRI images into four distinct categories:
 * **Glioma**
@@ -161,6 +238,12 @@ make dvc-repro
 make run-gateway
 make run-docker-all # start full Docker stack (run after dvc repro: model training + ONNX export + Triton repo generation)
 ```
+### Example CLI Inference:
+You can also run inference directly from CLI using a single image:
+```bash
+uv run python infer.py data/splits/test/images/1Pte.jpg
+```
+
 
 ## Technology Stack
 * **Deep Learning Framework:** `PyTorch`, `PyTorch Lightning`
