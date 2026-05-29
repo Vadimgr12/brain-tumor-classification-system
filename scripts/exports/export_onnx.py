@@ -1,31 +1,23 @@
 from pathlib import Path
 import torch
-
-from model_loader import (
-    load_brain_tumor_classification_model,
-    resolve_device,
-)
+from get_module import load_model_module
 from omegaconf import DictConfig
 import hydra
 
 
-def get_best_checkpoint(checkpoint_dir: str | Path):
-
-    checkpoint_dir = Path(checkpoint_dir)
-    all_checkpoints = list(checkpoint_dir.glob("*best*.ckpt"))
-
-    return max(all_checkpoints, key=lambda p: p.stat().st_mtime)
-
-
-@hydra.main(config_path="../conf", config_name="infer", version_base="1.3")
+@hydra.main(config_path="../../conf", config_name="config", version_base="1.3")
 def export_onnx(cfg: DictConfig) -> None:
 
-    checkpoint_path = get_best_checkpoint("checkpoints")
-    tumor_classification_project_dir = cfg.paths.model_dir
-    device = resolve_device(cfg.model.device)
-    model = load_brain_tumor_classification_model(
+    checkpoint_path = cfg.infer.paths.checkpoint_path
+
+    tumor_classification_project_dir = cfg.infer.paths.model_dir
+
+    model_loader = load_model_module(cfg.infer.paths.module_dir)
+    device = model_loader.resolve_device(cfg.infer.model.device)
+    model = model_loader.load_brain_tumor_classification_model(
         tumor_classification_project_dir, checkpoint_path, device
     )
+
     model.eval()
 
     artifacts_dir = Path("artifacts")

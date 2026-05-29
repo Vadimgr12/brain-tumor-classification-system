@@ -4,7 +4,7 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def resolve_device(device_name: str) -> torch.device:
@@ -42,13 +42,22 @@ def load_lightning_module(tumor_classification_project_dir: str | Path):
     return importlib.import_module("model")
 
 
+def get_best_checkpoint(checkpoint_dir: str | Path):
+
+    checkpoint_dir = Path(checkpoint_dir)
+    all_checkpoints = list(checkpoint_dir.glob("*best*.ckpt"))
+
+    return max(all_checkpoints, key=lambda p: p.stat().st_mtime)
+
+
 def load_brain_tumor_classification_model(
     tumor_classification_project_dir: str | Path,
-    checkpoint_path: str | Path,
+    checkpoint_dir: str | Path,
     device: torch.device,
 ) -> torch.nn.Module:
     """Load the trained Cityscapes Lightning checkpoint."""
     model_module = load_lightning_module(tumor_classification_project_dir)
+    checkpoint_path = get_best_checkpoint(checkpoint_dir)
     model = model_module.BrainTumorModule.load_from_checkpoint(
         str(checkpoint_path),
         map_location=device,

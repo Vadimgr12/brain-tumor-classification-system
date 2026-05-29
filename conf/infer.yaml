@@ -1,8 +1,0 @@
-paths:
-  repo_root: .
-  model_dir: ${paths.repo_root}/brain_tumor_classification
-model:
-  device: 'mps'
-
-data:
-  image_size: 256

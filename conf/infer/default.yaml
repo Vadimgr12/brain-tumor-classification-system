@@ -1,0 +1,9 @@
+paths:
+  model_dir: ./brain_tumor_classification
+  module_dir: brain_tumor_classification
+  checkpoint_path: checkpoints
+model:
+  device: 'mps'
+
+data:
+  image_size: 256

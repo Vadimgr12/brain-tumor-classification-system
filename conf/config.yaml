@@ -6,4 +6,5 @@ defaults:
   - logger: default
   - triton: default
   - eval: default
+  - infer: default
   - _self_
