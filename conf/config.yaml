@@ -4,4 +4,5 @@ defaults:
   - model: default
   - training: default
   - logger: default
+  - triton: default
   - _self_

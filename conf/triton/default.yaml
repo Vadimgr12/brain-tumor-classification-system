@@ -1,0 +1,13 @@
+model:
+  name: brain_tumor_classification
+  platform: onnxruntime_onnx
+
+input:
+  name: x
+  dtype: TYPE_FP32
+  dims: [1, 3, 224, 224]
+
+output:
+  name: logits
+  dtype: TYPE_FP32
+  dims: [1, 4]
