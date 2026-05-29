@@ -12,6 +12,6 @@ checkpoint:
   path: checkpoints
 
 model:
-  model_dir: ./tumor_classification_project_dir
+  model_dir: ./brain_tumor_classification
   out_classes: 4
   no_tumor_class: 2
