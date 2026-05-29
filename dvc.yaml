@@ -9,7 +9,7 @@ stages:
 
   split:
     desc: split raw dataset into train/val/test
-    cmd: python brain_tumor_classification/data/split.py --data_dir data/raw/ --out_dir data/splits/
+    cmd: uv run python brain_tumor_classification/data/split.py --data_dir data/raw/ --out_dir data/splits/
     deps:
       - brain_tumor_classification/data/split.py
       - data/raw/
@@ -18,7 +18,7 @@ stages:
 
   train_statistics:
     desc: compute mean/std statistics on train split
-    cmd: python brain_tumor_classification/data/compute_stats.py --data_dir data/splits/train --out_path data/stats/mean_std.json
+    cmd: uv run python brain_tumor_classification/data/compute_stats.py --data_dir data/splits/train --out_path data/stats/mean_std.json
     deps:
       - brain_tumor_classification/data/compute_stats.py
       - data/splits/train
@@ -27,7 +27,7 @@ stages:
 
   train:
     desc: Train brain tumor classifier
-    cmd: python train.py
+    cmd: uv run python train.py
     deps:
       - brain_tumor_classification/model.py
       - brain_tumor_classification/data/
@@ -35,6 +35,16 @@ stages:
       - data/
     outs:
       - checkpoints/
+
+  evaluate:
+    desc: Evaluate trained model on test set and compute metrics
+    cmd: uv run python brain_tumor_classification/evaluate.py
+    deps:
+      - brain_tumor_classification/evaluate.py
+      - checkpoints/
+      - data/splits/test
+    outs:
+      - results/
 
   export_onnx:
     desc: Export best model to ONNX

@@ -5,4 +5,5 @@ defaults:
   - training: default
   - logger: default
   - triton: default
+  - eval: default
   - _self_

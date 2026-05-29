@@ -1,0 +1,17 @@
+data:
+  data_dir: data/splits/test
+  batch_size: 16
+  num_workers: 2
+  image_size: 256
+  max_samples: null
+  split: test
+
+device: 'mps'
+
+checkpoint:
+  path: checkpoints
+
+model:
+  model_dir: ./tumor_classification_project_dir
+  out_classes: 4
+  no_tumor_class: 2
