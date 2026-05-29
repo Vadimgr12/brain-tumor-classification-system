@@ -18,7 +18,13 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 
 class BrainTumorModule(L.LightningModule):
     def __init__(
-        self, n_unfrozen, lr, t_max_scheduler, weight_decay, out_classes, no_tumor_class
+        self,
+        n_unfrozen: int,
+        lr: float,
+        t_max_scheduler: int,
+        weight_decay: float,
+        out_classes: int,
+        no_tumor_class: int,
     ):
 
         super().__init__()
@@ -42,10 +48,12 @@ class BrainTumorModule(L.LightningModule):
         self.auroc = AUROC(task="multiclass", num_classes=out_classes, average="macro")
         self.confmat = ConfusionMatrix(task="multiclass", num_classes=out_classes)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
 
-    def training_step(self, batch, batch_idx):
+    def training_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> torch.Tensor:
         x, y = batch
         logits = self(x)
         loss = self.criterion(logits, y)
@@ -53,13 +61,13 @@ class BrainTumorModule(L.LightningModule):
         self.log("train_loss", loss, on_step=True, on_epoch=False, prog_bar=True)
         return loss
 
-    def to_binary(self, preds, targets):
+    def to_binary(self, preds: torch.Tensor, targets: torch.Tensor):
         preds_bin = preds != self.no_tumor_class
         targets_bin = targets != self.no_tumor_class
 
         return preds_bin.int(), targets_bin.int()
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx: int) -> torch.Tensor:
         x, y = batch
         logits = self(x)
         loss = self.criterion(logits, y)

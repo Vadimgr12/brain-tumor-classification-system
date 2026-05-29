@@ -3,7 +3,7 @@ import torch.nn as nn
 from torchvision.models import efficientnet_v2_s, EfficientNet_V2_S_Weights
 
 
-def get_model(n_unfrozen, out_features) -> torch.nn.Module:
+def get_model(n_unfrozen: int, out_features: int) -> torch.nn.Module:
     """Get model to work with"""
 
     model = efficientnet_v2_s(weights=EfficientNet_V2_S_Weights.DEFAULT)

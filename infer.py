@@ -4,7 +4,7 @@ from services.triton_client import infer
 import numpy as np
 
 
-def inference(image_path):
+def inference(image_path: str) -> dict:
     image = np.array(Image.open(image_path).convert("RGB"))
     triton_answer = infer(image)
     return triton_answer
