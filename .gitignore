@@ -33,3 +33,7 @@ artifacts/
 
 #onnx models
 *.onnx*
+
+#dvc pipeline
+results
+triton_infer
