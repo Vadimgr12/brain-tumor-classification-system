@@ -1,13 +1,13 @@
 schema: '2.0'
 stages:
   split:
-    cmd: python brain_tumor_classification/data/split.py --data_dir data/raw/
-      --out_dir data/splits/
+    cmd: uv run python brain_tumor_classification/data/split.py --data_dir
+      data/raw/ --out_dir data/splits/
     deps:
     - path: brain_tumor_classification/data/split.py
       hash: md5
-      md5: 112f481d50b941fabe6a828c913cefae
-      size: 2294
+      md5: 55d30ab79bf3e50d88534395a6f7aa02
+      size: 2296
     - path: data/raw/
       hash: md5
       md5: 44f5fe7fb0109b3daf243825536be454.dir
@@ -16,12 +16,12 @@ stages:
     outs:
     - path: data/splits/
       hash: md5
-      md5: 4cc80a25f3a14d9434b8ffc3f6dff073.dir
+      md5: d77bb17a795965e819616f6cca9e5e82.dir
       size: 140209972
       nfiles: 10498
   train_statistics:
-    cmd: python brain_tumor_classification/data/compute_stats.py --data_dir
-      data/splits/train --out_path data/stats/mean_std.json
+    cmd: uv run python brain_tumor_classification/data/compute_stats.py
+      --data_dir data/splits/train --out_path data/stats/mean_std.json
     deps:
     - path: brain_tumor_classification/data/compute_stats.py
       hash: md5
@@ -51,3 +51,97 @@ stages:
       md5: 44f5fe7fb0109b3daf243825536be454.dir
       size: 140240790
       nfiles: 10498
+  train:
+    cmd: uv run python brain_tumor_classification/train.py
+    deps:
+    - path: brain_tumor_classification/data/
+      hash: md5
+      md5: 0c757d2acea6ce66cb96e1971e6c50ae.dir
+      size: 15398
+      nfiles: 6
+    - path: brain_tumor_classification/model.py
+      hash: md5
+      md5: e4bc8546275e52d0e529c08d11815546
+      size: 4995
+    - path: conf/
+      hash: md5
+      md5: 3d520e95c3841957678216d858e1d28a.dir
+      size: 7610
+      nfiles: 10
+    - path: data/
+      hash: md5
+      md5: eb0d6f03d02870195d14730b06dbcf67.dir
+      size: 280457144
+      nfiles: 20999
+    outs:
+    - path: checkpoints/
+      hash: md5
+      md5: 0c8296b31e9b99267c6e09c625fc60b2.dir
+      size: 457686942
+      nfiles: 2
+  evaluate:
+    cmd: uv run python brain_tumor_classification/evaluate.py
+    deps:
+    - path: brain_tumor_classification/evaluate.py
+      hash: md5
+      md5: bda56f1f5aaccc387d2dc7da1677d831
+      size: 3938
+    - path: checkpoints/
+      hash: md5
+      md5: 0c8296b31e9b99267c6e09c625fc60b2.dir
+      size: 457686942
+      nfiles: 2
+    - path: data/splits/test
+      hash: md5
+      md5: 03106312056d4eb27869204d7448d625.dir
+      size: 20550878
+      nfiles: 1586
+    outs:
+    - path: results/
+      hash: md5
+      md5: b7b5e821041d2d9ec6c546cdc4cce177.dir
+      size: 21369
+      nfiles: 2
+  export_onnx:
+    cmd: uv run python scripts/exports/export_onnx.py
+    deps:
+    - path: checkpoints/
+      hash: md5
+      md5: 0c8296b31e9b99267c6e09c625fc60b2.dir
+      size: 457686942
+      nfiles: 2
+    - path: scripts/exports/export_onnx.py
+      hash: md5
+      md5: 2f5fe709af5dd502774efe09a9dbac2b
+      size: 1218
+    outs:
+    - path: artifacts/model.onnx
+      hash: md5
+      md5: 447b2e5989b5cd34607f366d0114490e
+      size: 1582180
+    - path: artifacts/model.onnx.data
+      hash: md5
+      md5: fcc5cafa575dc221ea5760323840c2c5
+      size: 80478208
+  create_triton_files:
+    cmd: "mkdir -p triton_infer/models/brain_tumor_classification/1 &&\ncp artifacts/model.onnx*
+      triton_infer/models/brain_tumor_classification/1/ &&\nuv run python scripts/make_triton_config.py\n"
+    deps:
+    - path: artifacts/model.onnx
+      hash: md5
+      md5: 447b2e5989b5cd34607f366d0114490e
+      size: 1582180
+    - path: artifacts/model.onnx.data
+      hash: md5
+      md5: fcc5cafa575dc221ea5760323840c2c5
+      size: 80478208
+    - path: scripts/make_triton_config.py
+      hash: md5
+      md5: 939c511f54a8b1438852b1b574b3aecc
+      size: 887
+    outs:
+    - path: triton_infer/models/brain_tumor_classification/
+      hash: md5
+      md5: 4b3f07bc33d16eb1cfed21e078157301.dir
+      size: 82060617
+      nfiles: 3

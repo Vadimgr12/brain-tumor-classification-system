@@ -27,7 +27,7 @@ stages:
 
   train:
     desc: Train brain tumor classifier
-    cmd: uv run python train.py
+    cmd: uv run python brain_tumor_classification/train.py
     deps:
       - brain_tumor_classification/model.py
       - brain_tumor_classification/data/
@@ -50,26 +50,28 @@ stages:
     desc: Export best model to ONNX
     cmd: uv run python scripts/exports/export_onnx.py
     deps:
-      - scripts/export_onnx.py
+      - scripts/exports/export_onnx.py
       - checkpoints/
     outs:
-      - artifacts/
+      - artifacts/model.onnx
+      - artifacts/model.onnx.data
 
   create_triton_files:
     desc: Create Triton model repository
     cmd: |
       mkdir -p triton_infer/models/brain_tumor_classification/1 &&
-      cp artifacts/model.onnx* triton/models/brain_tumor_classification/1/ &&
+      cp artifacts/model.onnx* triton_infer/models/brain_tumor_classification/1/ &&
       uv run python scripts/make_triton_config.py
     deps:
       - artifacts/model.onnx
+      - artifacts/model.onnx.data
       - scripts/make_triton_config.py
     outs:
       - triton_infer/models/brain_tumor_classification/
 
   export_tensorrt:
     desc: Convert ONNX model to TensorRT
-    cmd: bash scripts/export_tensorrt.sh artifacts/model.onnx
+    cmd: bash scripts/exports/export_tensorrt.sh artifacts/model.onnx
     deps:
       - artifacts/model.onnx
       - scripts/exports/export_tensorrt.sh
