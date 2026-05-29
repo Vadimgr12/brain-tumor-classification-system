@@ -19,7 +19,7 @@ To ensure stable and computationally feasible training, all experiments were per
 * **Volume:** ~5,000 RGB MRI images + corresponding YOLO-formatted `.txt` annotation files (~140 MB total payload).
 * **Processing Input:** Images are dynamically resized to $256 \times 256$ pixels and normalized according to calculated dataset-specific statistics using the `Albumentations` library.
 * **Data Augmentations:** To enhance model generalization, prevent overfitting, and ensure robustness against clinical imaging variations, random spatial and color augmentations (such as flips, rotations, and brightness/contrast adjustments) are applied via `Albumentations` during the training phase.
-![Meningioma example](images/meningioma_ex.jpg)*Figure 1: Example MRI image of a meningioma case from the dataset.*
+![Meningioma example](images/meningioma_ex.jpg) *Figure 1: Example MRI image of a meningioma case from the dataset.*
 ###  Dataset Advantages & Key Strengths
 * **Class Balance:** Unlike many medical datasets suffering from severe class imbalance, this dataset features a **highly balanced distribution** across all four target categories (glioma, meningioma, pituitary, and no tumor). This inherent balance eliminates the need for complex loss-weighting techniques or oversampling, enabling stable and unbiased objective function convergence.
 
@@ -111,23 +111,23 @@ The architecture implements a centralized inference strategy where **NVIDIA Trit
 
 The system provides three production-ready execution paths and components:
 
-## A. Triton Inference Server Deployment Layer
+### A. Triton Inference Server Deployment Layer
 
 The core production inference layer is powered by **NVIDIA Triton Inference Server**, hosting the fine-tuned `EfficientNetV2-S` model serialized into an optimized **ONNX** format.
 
 The deployment pipeline automatically generates and versions a structured Triton Model Repository immediately following the training and export phases. This repository isolates the optimized model graph alongside its explicit configuration matrix (`config.pbtxt`).
 
-###  Model & Serialization Specifications
+####  Model & Serialization Specifications
 * **Format:** ONNX (Opset Version 17)
 * **Input Tensor Shape:** `[1, 3, 256, 256]` (Explicit batch size constraint of 1 for synchronous processing)
 * **Output Tensor:** Raw logits mapped to the 4 target tumor classes.
 
-###  Execution Environment & Runtime
+####  Execution Environment & Runtime
 * **Backend Provider:** Optimized ONNX Runtime CPU Backend.
 * **Hardware Note:** Computation runs entirely on host CPU execution providers (Apple Silicon MPS framework is omitted within the Triton container environment to guarantee target system cross-compatibility).
 * **Network Infrastructure:** Triton HTTP/REST Inference Server exposed natively on port `8000`, with optional support for gRPC protocol (port `8001`).
 
-###  Performance & Latency Characteristics
+####  Performance & Latency Characteristics
 * **Architecture Target:** Custom-tailored for low-latency, deterministic **single-image point inference** typical in clinical workstation diagnostic scenarios.
 * **Inference Latency:** Executes within a profile of **~tens-hundreds of milliseconds** on modern CPUs.
 * The measured end-to-end latency (~0.7s) includes preprocessing, network communication, Triton inference execution, and postprocessing.
