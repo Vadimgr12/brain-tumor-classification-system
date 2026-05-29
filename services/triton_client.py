@@ -21,7 +21,7 @@ def infer(x):
         requested_output = httpclient.InferRequestedOutput("linear")
 
         result = client.infer(
-            model_name="my_onnx_model",
+            model_name="brain_tumor_classification",
             inputs=[infer_input],
             outputs=[requested_output],
         )
