@@ -55,16 +55,6 @@ stages:
     outs:
       - artifacts/
 
-  export_tensorrt:
-    desc: Convert ONNX model to TensorRT
-    cmd: bash scripts/export_tensorrt.sh artifacts/model.onnx
-    deps:
-      - artifacts/model.onnx
-      - scripts/exports/export_tensorrt.sh
-    outs:
-      - artifacts/model.trt
-
-
   create_triton_files:
     desc: Create Triton model repository
     cmd: |
@@ -76,3 +66,12 @@ stages:
       - scripts/make_triton_config.py
     outs:
       - triton_infer/models/brain_tumor_classification/
+
+  export_tensorrt:
+    desc: Convert ONNX model to TensorRT
+    cmd: bash scripts/export_tensorrt.sh artifacts/model.onnx
+    deps:
+      - artifacts/model.onnx
+      - scripts/exports/export_tensorrt.sh
+    outs:
+      - artifacts/model.trt
