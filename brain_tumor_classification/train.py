@@ -43,15 +43,16 @@ def train(cfg: DictConfig) -> None:
         patience=cfg.training.early_stopping_patience,
         min_delta=cfg.training.early_stopping_min_delta,
     )
+    checkpoint_callback = ModelCheckpoint(
+        dirpath=cfg.training.checkpoint_dir,
+        filename="best",
+        monitor="Recall",
+        mode="max",
+        save_top_k=1,
+        save_last=True,
+    )
     callbacks = [
-        ModelCheckpoint(
-            dirpath=cfg.training.checkpoint_dir,
-            filename="best",
-            monitor="Recall",
-            mode="max",
-            save_top_k=1,
-            save_last=True,
-        ),
+        checkpoint_callback,
         LearningRateMonitor(logging_interval="epoch"),
         early_stopping,
     ]
@@ -75,6 +76,12 @@ def train(cfg: DictConfig) -> None:
     )
 
     trainer.fit(model, datamodule=datamodule)
+
+    logger.experiment.log_artifact(
+        logger.run_id,
+        checkpoint_callback.best_model_path,
+        artifact_path="checkpoints",
+    )
 
 
 if __name__ == "__main__":
