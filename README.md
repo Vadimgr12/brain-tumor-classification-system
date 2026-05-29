@@ -19,7 +19,10 @@ To ensure stable and computationally feasible training, all experiments were per
 * **Volume:** ~5,000 RGB MRI images + corresponding YOLO-formatted `.txt` annotation files (~140 MB total payload).
 * **Processing Input:** Images are dynamically resized to $256 \times 256$ pixels and normalized according to calculated dataset-specific statistics using the `Albumentations` library.
 * **Data Augmentations:** To enhance model generalization, prevent overfitting, and ensure robustness against clinical imaging variations, random spatial and color augmentations (such as flips, rotations, and brightness/contrast adjustments) are applied via `Albumentations` during the training phase.
-![Meningioma example](images/meningioma_ex.jpg) *Figure 1: Example MRI image of a meningioma case from the dataset.*
+
+![Meningioma example](images/meningioma_ex.jpg)
+
+*Figure 1: Example MRI image of a meningioma case from the dataset.*
 ###  Dataset Advantages & Key Strengths
 * **Class Balance:** Unlike many medical datasets suffering from severe class imbalance, this dataset features a **highly balanced distribution** across all four target categories (glioma, meningioma, pituitary, and no tumor). This inherent balance eliminates the need for complex loss-weighting techniques or oversampling, enabling stable and unbiased objective function convergence.
 
