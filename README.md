@@ -12,7 +12,6 @@ To ensure stable and computationally feasible training, all experiments were per
 
 ---
 
-Markdown
 ## Dataset Specification
 * **Source:** Kaggle (MRI Brain Tumor Dataset with Bounding Boxes)
 * **Link:** [Kaggle Dataset Link](https://www.kaggle.com/datasets/ahmedsorour1/mri-for-brain-tumor-with-bounding-boxes)
@@ -20,7 +19,7 @@ Markdown
 * **Volume:** ~5,000 RGB MRI images + corresponding YOLO-formatted `.txt` annotation files (~140 MB total payload).
 * **Processing Input:** Images are dynamically resized to $256 \times 256$ pixels and normalized according to calculated dataset-specific statistics using the `Albumentations` library.
 * **Data Augmentations:** To enhance model generalization, prevent overfitting, and ensure robustness against clinical imaging variations, random spatial and color augmentations (such as flips, rotations, and brightness/contrast adjustments) are applied via `Albumentations` during the training phase.
-
+![Meningioma example](images/meningioma_ex.jpg)*Figure 1: Example MRI image of a meningioma case from the dataset.*
 ###  Dataset Advantages & Key Strengths
 * **Class Balance:** Unlike many medical datasets suffering from severe class imbalance, this dataset features a **highly balanced distribution** across all four target categories (glioma, meningioma, pituitary, and no tumor). This inherent balance eliminates the need for complex loss-weighting techniques or oversampling, enabling stable and unbiased objective function convergence.
 
@@ -35,6 +34,10 @@ Markdown
 * **Fine-Tuning Strategy:** he model was fine-tuned using EfficientNetV2-S pretrained on ImageNet. During training, all feature extractor layers were initially frozen, and only the final **3 feature** blocks were unfrozen (n_unfrozen = 3), allowing task-specific adaptation while preserving pretrained representation.
 * **Input Tensor:** `[Batch_Size, 3, 256, 256]` (RGB Image)
 * **Output Layer:** A vector of raw logits mapped to the 4 target classes, converted to explicit prediction probabilities via a `Softmax` layer during inference.
+* **Baseline Model:** Feature Extractor (Backbone): Completely **frozen** (`requires_grad = False`). The model leverages generic visual features (edges, textures, shapes) directly from ImageNet without modifying the underlying weights. **Classification Head:** **Unfrozen** and trained from scratch specifically on the 4-class brain tumor dataset (5k trainable parameters).
+
+### ⚡ Key Advantage: Ultra-Fast Training
+Because the heavy convolutional backbone is fully frozen and only the lightweight linear classifier head computes gradients, the training process is **extremely fast (near-instantaneous)**. This setup drastically reduces computational overhead, eliminates the risk of catastrophic forgetting in early layers, and allows the baseline to be trained efficiently within minutes, even in strict CPU or local Apple Silicon (MPS) environments.
 
 ---
 
@@ -48,14 +51,16 @@ Markdown
 ### Final Evaluation Results
 The model demonstrates excellent generalization and high robustness, notably achieving perfect binary recall for tumor presence:
 
-| Metric | Value |
-| :--- | :--- |
-| **Accuracy** | `0.9849` |
-| **Recall (Macro)** | `0.9827` |
-| **F1-Score (Macro)** | `0.9844` |
-| **Precision-Recall AUC (PR-AUC)** | `0.9944` |
-| **ROC-AUC** | `0.9976` |
-| **Binary Recall (Tumor vs. No Tumor)** | `1.0000` |
+| Metric | Value | Baseline Value |
+| :--- | :--- |:---------------|
+| **Accuracy** | `0.9849` | `0.8584`       |
+| **Recall (Macro)** | `0.9827` | `0.8687`       |
+| **F1-Score (Macro)** | `0.9844` | `0.8634`       |
+| **Precision-Recall AUC (PR-AUC)** | `0.9944` | `0.9331`       |
+| **ROC-AUC** | `0.9976` | `0.9700`       |
+| **Binary Recall (Tumor vs. No Tumor)** | `1.0000` | `0.9800`       |             |
+
+A particularly important result is the near-perfect Binary Recall (Tumor vs. No Tumor), which reaches 1.0000 in the final model. In the medical context, recall is a critical metric as it directly reflects the model’s ability to avoid false negatives — i.e., not missing actual tumor cases.  This demonstrates that the model is highly reliable for screening purposes and prioritizes patient safety.
 
 ---
 
@@ -92,7 +97,7 @@ Every pipeline run is tracked by **MLflow**. The system automatically logs:
 * **Hyperparameters:** Learning rate.
 * **Metrics:** Continuous training/validation loss curves, step-by-step accuracy, and final evaluation arrays.
 * **Artifacts:** Best performing model checkpoints, confusion matrices.
-![MLflow Training Tracking](images/mlflow1.png) *Figure 1: MLflow dashboard.*
+![MLflow Training Tracking](images/mlflow1.png) *Figure 2: MLflow dashboard.*
 ### 3. Model Export (`ONNX`)
 To decouple the model from the PyTorch runtime and accelerate inference, the trained checkpoint is serialized to **ONNX (Opset Version 17)**:
 * **Input Node Name:** `x`
@@ -106,11 +111,27 @@ The architecture implements a centralized inference strategy where **NVIDIA Trit
 
 The system provides three production-ready execution paths and components:
 
-### A. Scalable Production Serving Core (Triton Inference Server)
-The central backbone of the inference ecosystem. It hosts the optimized ONNX model repository and handles all heavy tensor computations.
-* **Concurrent Execution:** Enables multiple model instances to run simultaneously across incoming request streams.
-* **Dynamic Batching:** Automatically groups individual incoming requests into optimal batch sizes on the fly, maximizing hardware throughput.
-* **Standardized Endpoints:** Exposes high-performance, low-latency **gRPC** and **HTTP/REST** protocols.
+## A. Triton Inference Server Deployment Layer
+
+The core production inference layer is powered by **NVIDIA Triton Inference Server**, hosting the fine-tuned `EfficientNetV2-S` model serialized into an optimized **ONNX** format.
+
+The deployment pipeline automatically generates and versions a structured Triton Model Repository immediately following the training and export phases. This repository isolates the optimized model graph alongside its explicit configuration matrix (`config.pbtxt`).
+
+###  Model & Serialization Specifications
+* **Format:** ONNX (Opset Version 17)
+* **Input Tensor Shape:** `[1, 3, 256, 256]` (Explicit batch size constraint of 1 for synchronous processing)
+* **Output Tensor:** Raw logits mapped to the 4 target tumor classes.
+
+###  Execution Environment & Runtime
+* **Backend Provider:** Optimized ONNX Runtime CPU Backend.
+* **Hardware Note:** Computation runs entirely on host CPU execution providers (Apple Silicon MPS framework is omitted within the Triton container environment to guarantee target system cross-compatibility).
+* **Network Infrastructure:** Triton HTTP/REST Inference Server exposed natively on port `8000`, with optional support for gRPC protocol (port `8001`).
+
+###  Performance & Latency Characteristics
+* **Architecture Target:** Custom-tailored for low-latency, deterministic **single-image point inference** typical in clinical workstation diagnostic scenarios.
+* **Inference Latency:** Executes within a profile of **~tens-hundreds of milliseconds** on modern CPUs.
+* The measured end-to-end latency (~0.7s) includes preprocessing, network communication, Triton inference execution, and postprocessing.
+* **Batching Strategy:** Dynamic request batching is explicitly disabled by default (`max_batch_size: 0` in configuration) to optimize and prioritize minimal processing latency for individual, real-time medical image queries **HTTP/REST** protocols.
 
 ### B. Lightweight REST API Gateway (FastAPI)
 A highly optimized Python web service tailored for low-overhead client communication and public routing.
@@ -120,7 +141,7 @@ A highly optimized Python web service tailored for low-overhead client communica
 ### C. Command Line Interface (CLI)
 A dedicated terminal utility designed for rapid diagnostics, automated batch scripts, or local engineering workflows.
 * **Direct Triton Client:** It reads a local image path from terminal arguments, performs the required image transformations, **sends a synchronous inference request to the Triton server**, and prints the structured classification output directly to the console.
-![FastAPI & Triton Inference Response](images/fastapi.png) *Figure 2: FastAPI interactive documentation demonstrating a successful brain tumor classification request.*
+![FastAPI & Triton Inference Response](images/fastapi.png) *Figure 3: FastAPI interactive documentation demonstrating a successful brain tumor classification request.*
 ---
 
 ## ⚡ Quick Start & Pipeline Execution
@@ -135,7 +156,7 @@ This will start the full MLOps infrastructure, including the MLflow tracking ser
 make run-mlflow
 make dvc-repro
 make run-gateway
-make run-docker-all
+make run-docker-all # start full Docker stack (run after dvc repro: model training + ONNX export + Triton repo generation)
 ```
 
 ## Technology Stack
@@ -149,7 +170,7 @@ make run-docker-all
 
 ## Key Architecture Decisions
 1.  **Classification Shift:** Transitioning the problem statement from object detection to image classification drastically reduced computational overhead, enabling stable and efficient training on local environments (Apple Silicon / CPU) while preserving clinically meaningful diagnostic performance (tumor presence and type). This design choice was made to prioritize the development of a complete and reproducible MLOps pipeline, including training, experiment tracking, model export, and deployment, rather than focusing on computationally intensive detection modeling.
-2.  **EfficientNet Transfer Learning:** Utilizing a highly optimized pretrained CNN allowed the system to hit over **98% accuracy** rapidly with a relatively small specialized dataset (~6,000 samples).
+2.  **EfficientNet Transfer Learning:** Utilizing a highly optimized pretrained CNN allowed the system to hit over **98% accuracy** rapidly with a relatively small specialized dataset (~5,000 samples).
 3.  **ONNX Portability:** Exporting checkpoints to ONNX ensures that the downstream deployment pipelines are completely independent of the training source code, enabling rapid execution across varying execution engines.
 
 ---
