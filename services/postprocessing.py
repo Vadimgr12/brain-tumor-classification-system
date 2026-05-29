@@ -1,13 +1,8 @@
 import numpy as np
+from services.constants import MESSAGES
 
 
 def get_message(class_id, probability):
-    MESSAGES = {
-        0: "GLIOMA detected",
-        1: "MENINGIOMA detected",
-        2: "NO TUMOR detected",
-        3: "PITUITARY detected",
-    }
 
     base = MESSAGES[class_id]
     status = "Looks healthy." if class_id == 2 else "Visit a doctor ASAP."
