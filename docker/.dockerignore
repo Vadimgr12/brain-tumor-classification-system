@@ -1,9 +1,0 @@
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.venv/
-.env
-.git/
-.idea/
-.DS_Store

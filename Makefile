@@ -9,7 +9,7 @@ run-minio:
 	docker compose up -d minio
 
 run-gateway:
-	docker compose up -d http-gateway
+	uv run uvicorn api.main:app --reload --port 8081
 
 run-triton:
 	docker compose up -d triton

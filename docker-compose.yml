@@ -7,24 +7,8 @@ services:
     volumes:
       - minio_data:/data
     env_file:
-      - ../envs/.minio.env.example
+      - ./envs/.minio.env.example
     command: server /data --console-address ":9001"
-    networks:
-      - my_network
-
-  http-gateway:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile_api
-    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
-    image: docker_image_http
-    ports:
-      - "8000:8000"
-    healthcheck:
-      test: [ "CMD", "python", "-c", "import requests; assert requests.get('http://localhost:8000/health').status_code == 200" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - my_network
 
@@ -40,7 +24,7 @@ services:
       - ./triton_infer/models:/triton_infer/models
     command: >
       tritonserver
-      --model-repository=/triton/models
+      --model-repository=/triton_infer/models
       --log-verbose=1
     networks:
       - my_network
