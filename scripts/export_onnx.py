@@ -37,7 +37,14 @@ def export_onnx(cfg: DictConfig) -> None:
     dummy_input = torch.randn(1, 3, image_size, image_size).to(device)
 
     with torch.inference_mode():
-        torch.onnx.export(model, dummy_input, str(onnx_path), opset_version=17)
+        torch.onnx.export(
+            model,
+            dummy_input,
+            str(onnx_path),
+            opset_version=17,
+            input_names=["x"],
+            output_names=["logits"],
+        )
 
     print("Successfully saved in ONNX!")
 

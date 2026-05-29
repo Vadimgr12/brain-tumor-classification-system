@@ -18,14 +18,14 @@ def infer(x):
     try:
         infer_input = httpclient.InferInput("x", x.shape, "FP32")
         infer_input.set_data_from_numpy(x)
-        requested_output = httpclient.InferRequestedOutput("linear")
+        requested_output = httpclient.InferRequestedOutput("logits")
 
         result = client.infer(
             model_name="brain_tumor_classification",
             inputs=[infer_input],
             outputs=[requested_output],
         )
-        logits = result.as_numpy("linear")
+        logits = result.as_numpy("logits")
         if logits is None:
             raise RuntimeError("Triton returned empty output")
 
