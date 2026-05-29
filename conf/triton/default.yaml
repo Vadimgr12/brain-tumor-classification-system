@@ -11,3 +11,6 @@ output:
   name: logits
   dtype: TYPE_FP32
   dims: [1, 4]
+
+path:
+  directory: triton/models

@@ -30,7 +30,7 @@ output [
 def main(cfg: DictConfig):
     config_text = build_config(cfg.triton)
 
-    model_dir = Path("triton/models") / cfg.triton.model.name
+    model_dir = Path(cfg.triton.path.directory) / cfg.triton.model.name
     model_dir.mkdir(parents=True, exist_ok=True)
 
     config_path = model_dir / "config.pbtxt"

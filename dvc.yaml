@@ -43,7 +43,7 @@ stages:
       - scripts/export_onnx.py
       - checkpoints/
     outs:
-      - artifacts/model.onnx
+      - artifacts/
 
   export_tensorrt:
     desc: Convert ONNX model to TensorRT
@@ -53,3 +53,16 @@ stages:
       - scripts/export_tensorrt.sh
     outs:
       - artifacts/model.trt
+
+
+  create_triton_files:
+    desc: Create Triton model repository
+    cmd: |
+      mkdir -p triton/models/brain_tumor_classification/1 &&
+      cp artifacts/model.onnx* triton/models/brain_tumor_classification/1/ &&
+      uv run python scripts/make_triton_config.py
+    deps:
+      - artifacts/model.onnx
+      - scripts/make_triton_config.py
+    outs:
+      - triton/models/brain_tumor_classification/
