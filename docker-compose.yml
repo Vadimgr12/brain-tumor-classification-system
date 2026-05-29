@@ -30,14 +30,14 @@ services:
 
   triton:
     image: nvcr.io/nvidia/tritonserver:24.08-py3
-    container_name: triton
+    container_name: triton_infer
     ports:
       - "8000:8000"
       - "8001:8001"
       - "8002:8002"
     shm_size: "256mb"
     volumes:
-      - ./triton/models:/triton/models
+      - ./triton_infer/models:/triton_infer/models
     command: >
       tritonserver
       --model-repository=/triton/models
