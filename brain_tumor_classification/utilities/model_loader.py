@@ -62,9 +62,9 @@ def load_brain_tumor_classification_model(
         str(checkpoint_path),
         map_location=device,
         weights_only=False,
-        n_unfrozen=3,  # ⚠️ если у тебя есть — поставь реальное значение
+        n_unfrozen=3, 
         lr=1e-3,
-        t_max_scheduler=15,  # обычно = max_epochs
+        t_max_scheduler=15, 
         weight_decay=1e-4,
         out_classes=4,
         no_tumor_class=2,
